@@ -1,9 +1,10 @@
 package org.jxiang.crud.dao;
 
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.jxiang.crud.bean.Employee;
 import org.jxiang.crud.bean.EmployeeExample;
+
+import java.util.List;
 
 public interface EmployeeMapper {
     long countByExample(EmployeeExample example);
@@ -17,8 +18,11 @@ public interface EmployeeMapper {
     int insertSelective(Employee record);
 
     List<Employee> selectByExample(EmployeeExample example);
-
     Employee selectByPrimaryKey(Integer empId);
+
+    // added select methods with department info
+    List<Employee> selectByExampleWithDepartment(EmployeeExample example);
+    Employee selectByPrimaryKeyDepartment(Integer empId);
 
     int updateByExampleSelective(@Param("record") Employee record, @Param("example") EmployeeExample example);
 
