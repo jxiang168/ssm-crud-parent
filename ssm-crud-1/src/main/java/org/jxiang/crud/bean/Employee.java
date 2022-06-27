@@ -5,6 +5,17 @@ public class Employee {
 
     private String empName;
 
+    public Employee(Integer empId, String empName, String gender, String email, Integer dId) {
+        this.empId = empId;
+        this.empName = empName;
+        this.gender = gender;
+        this.email = email;
+        this.dId = dId;
+    }
+
+    public Employee() {
+    }
+
     private String gender;
 
     private String email;
