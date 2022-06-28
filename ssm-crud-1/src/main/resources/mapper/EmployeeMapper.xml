@@ -15,8 +15,8 @@
     <result column="email" jdbcType="VARCHAR" property="email" />
     <result column="d_id" jdbcType="INTEGER" property="dId" />
     <association property="department" javaType="org.jxiang.crud.bean.Department">
-      <id column="dept_id" jdbcType="INTEGER" property="deptId" />
-      <result column="dept_name" jdbcType="VARCHAR" property="deptName" />
+      <id column="dep_id" jdbcType="INTEGER" property="depId" />
+      <result column="dep_name" jdbcType="VARCHAR" property="depName" />
     </association>
   </resultMap>
   <sql id="Example_Where_Clause">
@@ -81,7 +81,7 @@
     emp_id, emp_name, gender, email, d_id
   </sql>
   <sql id="WithDept_Column_List">
-    e.emp_id, e.emp_name, e.gender, e.email, e.d_id, d.dept_id, d.dept_name
+    e.emp_id, e.emp_name, e.gender, e.email, e.d_id, d.dep_id, d.dep_name
   </sql>
   <select id="selectByExample" parameterType="org.jxiang.crud.bean.EmployeeExample" resultMap="BaseResultMap">
     select
@@ -110,7 +110,7 @@
       distinct
     </if>
     <include refid="WithDept_Column_List" />
-    from tbl_emp e left join tbl_dept d on d.dept_id = e.d_id
+    from tbl_emp e left join tbl_dept d on d.dep_id = e.d_id
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -118,11 +118,11 @@
       order by ${orderByClause}
     </if>
   </select>
-<!-- Employee selectByPrimaryKeyDepartment(Integer empId); -->
-  <select id="selectByPrimaryKeyDepartment" parameterType="java.lang.Integer" resultMap="WithDeptResultMap">
+<!-- Employee selectByPrimaryKeyWithDepartment(Integer empId); -->
+  <select id="selectByPrimaryKeyWithDepartment" parameterType="java.lang.Integer" resultMap="WithDeptResultMap">
     select
     <include refid="WithDept_Column_List" />
-    from from tbl_emp e left join tbl_dept d on d.dept_id = e.d_id
+    from tbl_emp e left join tbl_dept d on d.dep_id = e.d_id
     where e.emp_id = #{empId,jdbcType=INTEGER}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">

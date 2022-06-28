@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.UUID;
-
 /**
  * TODO
  *
@@ -39,10 +37,14 @@ public class MapperTest {
         // 2. insert a fwe employees
 //        employeeMapper.insertSelective(new Employee(null,"Jerry","M","Jerry@jxiang.org",1));
         // 3. insert batch employees
-        EmployeeMapper mapper = sqlSession.getMapper(EmployeeMapper.class);
-        for (int i = 0; i < 1000; i++) {
-            String uid = UUID.randomUUID().toString().substring(0, 5) + String.valueOf(i);
-            mapper.insertSelective(new Employee(null, uid, "M", uid + "@jxiang.org", 1));
-        }
+//        EmployeeMapper mapper = sqlSession.getMapper(EmployeeMapper.class);
+//        for (int i = 0; i < 1000; i++) {
+//            String uid = UUID.randomUUID().toString().substring(0, 5) + String.valueOf(i);
+//            mapper.insertSelective(new Employee(null, uid, "M", uid + "@jxiang.org", 1));
+//        }
+        // fix empty department issue
+        Employee employee = employeeMapper.selectByPrimaryKeyWithDepartment(1);
+        System.out.println(employee);
+        System.out.println(employee.getDepartment());
     }
 }

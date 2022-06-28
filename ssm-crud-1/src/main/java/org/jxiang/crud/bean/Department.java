@@ -5,6 +5,14 @@ public class Department {
 
     private String depName;
 
+    @Override
+    public String toString() {
+        return "Department{" +
+                "depId=" + depId +
+                ", depName='" + depName + '\'' +
+                '}';
+    }
+
     public Department(Integer depId, String depName) {
         this.depId = depId;
         this.depName = depName;

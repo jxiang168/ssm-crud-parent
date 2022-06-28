@@ -22,7 +22,7 @@ public interface EmployeeMapper {
 
     // added select methods with department info
     List<Employee> selectByExampleWithDepartment(EmployeeExample example);
-    Employee selectByPrimaryKeyDepartment(Integer empId);
+    Employee selectByPrimaryKeyWithDepartment(Integer empId);
 
     int updateByExampleSelective(@Param("record") Employee record, @Param("example") EmployeeExample example);
 
