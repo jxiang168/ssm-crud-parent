@@ -43,8 +43,12 @@ public class MapperTest {
 //            mapper.insertSelective(new Employee(null, uid, "M", uid + "@jxiang.org", 1));
 //        }
         // fix empty department issue
-        Employee employee = employeeMapper.selectByPrimaryKeyWithDepartment(1);
-        System.out.println(employee);
-        System.out.println(employee.getDepartment());
+//        Employee employee = employeeMapper.selectByPrimaryKeyWithDepartment(1);
+//        System.out.println(employee);
+//        System.out.println(employee.getDepartment());
+        Employee employee = new Employee(2,null,"M","946f10@jxiang.org",2);
+        int i = employeeMapper.updateByPrimaryKeySelective(employee);
+        System.out.println(i);
+        System.out.println(employeeMapper.selectByPrimaryKey(2));
     }
 }

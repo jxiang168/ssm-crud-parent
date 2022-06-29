@@ -20,6 +20,14 @@ public class EmployeeService {
     @Autowired
     EmployeeMapper employeeMapper;
 
+    public int updateEmployee(Employee employee) {
+        return employeeMapper.updateByPrimaryKeySelective(employee);
+    }
+
+    public Employee getEmpById(Integer empId) {
+        return employeeMapper.selectByPrimaryKey(empId);
+    }
+
     public void saveEmp(Employee employee) {
         employeeMapper.insertSelective(employee);
     }

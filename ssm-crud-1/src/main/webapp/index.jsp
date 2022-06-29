@@ -76,6 +76,64 @@
     </div>
 </div>
 
+<!-- emp update Modal -->
+<div class="modal fade" id="emp_update_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">修改员工</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <input type="hidden" id="empid_update_hidden" name="empId"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="empName_add_input" class="col-sm-2 control-label">empName</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static" id="empName_update_static" name="empName"></p>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email_add_input" class="col-sm-2 control-label">email</label>
+                        <div class="col-sm-10">
+                            <input name="email" type="email" class="form-control" id="email_update_input"
+                                   placeholder="example@jxiang.org">
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">gender</label>
+                        <div class="col-sm-10">
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" id="gender1_update_input" value="M" checked> 男
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="gender" id="gender2_update_input" value="F"> 女
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="dep_add_input" class="col-sm-2 control-label">depName</label>
+                        <div id="dep_update_input" class="col-sm-4">
+                            <select id="dep_update_select" name="dId" class="form-control">
+                                <%--                                <option value="1">部门1</option>--%>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="emp_update_btn" type="button" class="btn btn-primary">更新</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- page layout -->
 <div class="container">
     <%--  title  --%>
@@ -117,7 +175,88 @@
 </div>
 <script>
 
+    <%-- bind onload --%>
+    $(function () {
+        // default visit first page
+        to_page(1);
+
+        // bind add emp button
+        $("#emp_add_btn").click(function () {
+            // reset form
+            reset_form("#emp_add_modal form");
+            // $("#emp_add_modal form").attr("valid_status","");
+            // get dep list
+            getDepts("#dep_add_select");
+            // pop modal
+            $("#emp_add_modal").modal({
+                backdrop: "static"
+            });
+        });
+
+        // bind employee save button
+        $("#emp_save_btn").click(save_button_click);
+
+        // listen on click event on edit button
+        $(document).on("click", ".edit_btn", edit_btn_click);
+
+        // bind employee update btn
+        $("#emp_update_btn").click(update_button_click);
+
+    });
+
+    function update_button_click() {
+        var emp = $("#emp_update_modal form").serialize();
+        // console.log(emp);
+        $.ajax({
+            url: "${APP_PATH}/emp/"+$("#empid_update_hidden").val(),
+            type: "POST",
+            data: emp,
+            success: function (result) {
+                alert(result.msg);
+                if (result.code == "100") {
+                    $("#emp_update_modal").modal("hide");
+                    to_page(currentPageNum);
+                } else {
+                    // if (result.extend.errorFields.empName) {
+                    //     set_validation_status("#empName_update_input", "error", result.extend.errorFields.empName);
+                    // }
+                    if (result.extend.errorFields.email) {
+                        set_validation_status("#email_update_input", "error", result.extend.errorFields.email);
+                    }
+                }
+            }
+        });
+    }
+
+    function edit_btn_click() {
+        // 1. reset edit form
+        reset_form("#emp_update_modal form");
+        // 2. query department data
+        getDepts("#dep_update_select");
+        // 3. get and fill emp data
+        var empId = $(this).attr("empId");
+        $.ajax({
+            url:"${APP_PATH}/emp/"+ empId,
+            type:"GET",
+            success:function(result){
+                var emp = result.extend.empData;
+                // console.log(emp);
+                $("#empid_update_hidden").val(emp.empId);
+                console.log($("#empid_update_hidden").val());
+                $("#empName_update_static").text(emp.empName);
+                $("#email_update_input").val(emp.email);
+                $("#emp_update_modal input[name='gender']").val([emp.gender]);
+                $("#dep_update_select").val(emp.dId);
+            }
+        })
+        // 4. pop up modal
+        $("#emp_update_modal").modal({
+            backdrop: "static"
+        });
+    }
+
     var totalPageNum;
+    var currentPageNum;
 
     function set_validation_status(ele, status, msg) {
         $(ele).parent().removeClass("has-success has-error");
@@ -167,18 +306,18 @@
             url: "${APP_PATH}/emp.checkname",
             type: "GET",
             data: "empName=" + empName,
-            async:false,
+            async: false,
             success: function (result) {
                 if (result.code == "100") {
                     set_validation_status("#empName_add_input", "success", "");
-                    $("#emp_add_modal form").attr("validated","true");
+                    $("#emp_add_modal form").attr("validated", "true");
                 } else {
                     set_validation_status("#empName_add_input", "error", "用户名已存在，不能重复。");
-                    $("#emp_add_modal form").attr("validated","false");
+                    $("#emp_add_modal form").attr("validated", "false");
                 }
             }
         })
-        if ($("#emp_add_modal form").attr("validated")=="true") {
+        if ($("#emp_add_modal form").attr("validated") == "true") {
             return true;
         } else {
             return false;
@@ -192,6 +331,7 @@
             type: "get",
             success: function (result) {
                 totalPageNum = result.extend.pageInfo.pages;
+                currentPageNum = result.extend.pageInfo.pageNum;
                 // console.log(result);
                 //    1. emps table
                 build_emps_table(result);
@@ -202,30 +342,8 @@
         })
     }
 
-    <%-- bind onload --%>
-    $(function () {
-        // default visit first page
-        to_page(1);
 
-        // bind add emp button
-        $("#emp_add_btn").click(function () {
-            // reset form
-            reset_form("#emp_add_modal form");
-            // $("#emp_add_modal form").attr("valid_status","");
-            // get dep list
-            getDepts();
-            // pop modal
-            $("#emp_add_modal").modal({
-                backdrop: "static"
-            })
-        });
-
-        // bind employee save button
-        $("#emp_save_btn").click(save_button_click);
-
-    });
-
-    function save_button_click () {
+    function save_button_click() {
         if (validate_add_form() == true) {
             if (valid_add_form_bg()) {
                 var emp = $("#emp_add_modal form").serialize();
@@ -235,14 +353,14 @@
                     data: emp,
                     success: function (result) {
                         alert(result.msg);
-                        if(result.errorCode == "100") {
+                        if (result.code == "100") {
                             $("#emp_add_modal").modal("hide");
                             to_page(totalPageNum + 1);
                         } else {
-                            if(result.extend.errorFields.empName) {
+                            if (result.extend.errorFields.empName) {
                                 set_validation_status("#empName_add_input", "error", result.extend.errorFields.empName);
                             }
-                            if(result.extend.errorFields.email) {
+                            if (result.extend.errorFields.email) {
                                 set_validation_status("#email_add_input", "error", result.extend.errorFields.email);
                             }
                         }
@@ -254,20 +372,21 @@
 
     function reset_form(ele) {
         $(ele)[0].reset();
-        $(ele).attr("validated","false");
+        $(ele).attr("validated", "false");
         $(ele).find("*").removeClass("has-success has-error");
         $(ele).find(".help-block").text("");
     }
 
-    function getDepts() {
+    function getDepts(ele) {
         $.ajax({
             url: "${APP_PATH}/depts",
             type: "GET",
             success: function (result) {
                 // console.log(result);
+                $(ele).empty();
                 $.each(result.extend.depts, function () {
                     // <option value="1">部门1</option>
-                    $("#dep_add_select").append(
+                    $(ele).append(
                         $("<option></option>").attr("value", this.depId).append(this.depName)
                     );
                 });
@@ -286,12 +405,12 @@
             var emailTd = $("<td></td>").append(item.email);
             var depNameTd = $("<td></td>").append(item.department.depName);
             // var editBtn = $('<button class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-pencil"/>编辑</button>');
-            var editBtn = $("<button></button>").addClass("btn btn-primary btn-sm")
+            var editBtn = $("<button></button>").addClass("btn btn-primary btn-sm edit_btn").attr("empId",item.empId)
                 .append($("<span></span>").addClass("glyphicon glyphicon-pencil"))
                 .append("编辑");
-            var deleteBtn = $("<button></button>").addClass("btn btn-danger btn-sm")
+            var deleteBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn").attr("empId",item.empId)
                 .append($("<span></span>").addClass("glyphicon glyphicon-trash"))
-                .append("编辑");
+                .append("删除");
             var actionTd = $("<td></td>").append(editBtn).append(" ").append(deleteBtn);
             $("<tr></tr>").append(empIdTd)
                 .append(empNameTd)
@@ -300,7 +419,7 @@
                 .append(depNameTd)
                 .append(actionTd)
                 .appendTo("#emps_table tbody");
-        })
+        });
     }
 
     function build_page_info(result) {

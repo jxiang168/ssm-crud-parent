@@ -10,10 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -31,6 +28,33 @@ public class EmployeeController {
 
     @Autowired
     EmployeeService employeeService;
+
+    @RequestMapping(path = "/emp/{id}",method = RequestMethod.POST)
+    @ResponseBody
+    public Msg updateEmp(@PathVariable("id")Integer empId, @Valid Employee employee, BindingResult result) {
+        if(result.hasErrors()) {
+            HashMap<String, Object> map = new HashMap<>();
+            for (FieldError fieldError : result.getFieldErrors()) {
+                map.put(fieldError.getField(),fieldError.getDefaultMessage());
+            }
+            return Msg.fail().add("errorFields",map);
+        } else {
+            employee.setEmpId(empId);
+            int ret = employeeService.updateEmployee(employee);
+            if(ret!=0) {
+                return Msg.success();
+            } else {
+                return Msg.fail();
+            }
+        }
+    }
+
+    @RequestMapping(path = "/emp/{id}",method = RequestMethod.GET)
+    @ResponseBody
+    public Msg getEmp(@PathVariable("id") Integer empId) {
+        Employee employee = employeeService.getEmpById(empId);
+        return Msg.success().add("empData",employee);
+    }
 
     @RequestMapping("/emp.checkname")
     @ResponseBody
