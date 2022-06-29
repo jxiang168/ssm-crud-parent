@@ -28,6 +28,17 @@ public class EmployeeController {
     @Autowired
     EmployeeService employeeService;
 
+    @RequestMapping("/emp.checkname")
+    @ResponseBody
+    public Msg checkEmp(String empName) {
+        long nameCount = employeeService.getNameCount(empName);
+        if (nameCount==0) {
+            return Msg.success();
+        } else {
+            return Msg.fail();
+        }
+    }
+
     @RequestMapping(path = "/emp", method = RequestMethod.POST)
     @ResponseBody
     public Msg saveEmp(Employee employee) {
@@ -51,5 +62,6 @@ public class EmployeeController {
         msg.add("pageInfo", page);
         return msg;
     }
+
 
 }

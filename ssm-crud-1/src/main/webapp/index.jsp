@@ -36,6 +36,7 @@
                         <div class="col-sm-10">
                             <input name="empName" type="text" class="form-control" id="empName_add_input"
                                    placeholder="empName">
+                            <span class="help-block"></span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -43,6 +44,7 @@
                         <div class="col-sm-10">
                             <input name="email" type="email" class="form-control" id="email_add_input"
                                    placeholder="example@jxiang.org">
+                            <span class="help-block"></span>
                         </div>
                     </div>
                     <div class="form-group">
@@ -60,7 +62,7 @@
                         <label for="dep_add_input" class="col-sm-2 control-label">depName</label>
                         <div id="dep_add_input" class="col-sm-4">
                             <select id="dep_add_select" name="dId" class="form-control">
-<%--                                <option value="1">部门1</option>--%>
+                                <%--                                <option value="1">部门1</option>--%>
                             </select>
                         </div>
                     </div>
@@ -117,6 +119,72 @@
 
     var totalPageNum;
 
+    function set_validation_status(ele, status, msg) {
+        $(ele).parent().removeClass("has-success has-error");
+        if (status == "success") {
+            $(ele).parent().addClass("has-success")
+        } else {
+            $(ele).parent().addClass("has-error")
+        }
+        $(ele).next("span").text(msg);
+    }
+
+    function validate_add_form() {
+        var result = "";
+
+        // 1. empName
+        var empName = $("#empName_add_input").val();
+        var regName = /^[a-z0-9_-]{6,16}$/;
+        if (!regName.test(empName)) {
+            result = result + "用户名只能是6-16位英文或数字。" + "\n";
+            set_validation_status("#empName_add_input", "error", "用户名只能是6-16位英文或数字。");
+        } else {
+            set_validation_status("#empName_add_input", "success", "");
+        }
+
+        // 2. email
+        var email = $("#email_add_input").val();
+        var regEmail = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;
+        if (!regEmail.test(email)) {
+            result = result + "邮箱格式不正确。" + "\n";
+            set_validation_status("#email_add_input", "error", "邮箱格式不正确。");
+        } else {
+            set_validation_status("#email_add_input", "success", "");
+        }
+
+        // final
+        if (result != "") {
+            // alert(result);
+            return false;
+        }
+        return true;
+    }
+
+    function valid_add_form_bg() {
+        // 1. empName not dupe
+        var empName = $("#empName_add_input").val();
+        $.ajax({
+            url: "${APP_PATH}/emp.checkname",
+            type: "GET",
+            data: "empName=" + empName,
+            async:false,
+            success: function (result) {
+                if (result.code == "100") {
+                    set_validation_status("#empName_add_input", "success", "");
+                    $("#emp_add_modal form").attr("validated","true");
+                } else {
+                    set_validation_status("#empName_add_input", "error", "用户名已存在，不能重复。");
+                    $("#emp_add_modal form").attr("validated","false");
+                }
+            }
+        })
+        if ($("#emp_add_modal form").attr("validated")=="true") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     function to_page(pn) {
         $.ajax({
             url: "${APP_PATH}/emps",
@@ -141,6 +209,9 @@
 
         // bind add emp button
         $("#emp_add_btn").click(function () {
+            // reset form
+            $("#emp_add_modal form")[0].reset();
+            // $("#emp_add_modal form").attr("valid_status","");
             // get dep list
             getDepts();
             // pop modal
@@ -150,18 +221,22 @@
         });
 
         // bind employee save button
-        $("#emp_save_btn").click(function(){
-            var emp = $("#emp_add_modal form").serialize();
-            $.ajax({
-                url:"${APP_PATH}/emp",
-                type:"POST",
-                data:emp,
-                success:function(result) {
-                    alert(result.msg);
+        $("#emp_save_btn").click(function () {
+            if (validate_add_form() == true) {
+                if (valid_add_form_bg()) {
+                    var emp = $("#emp_add_modal form").serialize();
+                    $.ajax({
+                        url: "${APP_PATH}/emp",
+                        type: "POST",
+                        data: emp,
+                        success: function (result) {
+                            alert(result.msg);
+                            $("#emp_add_modal").modal("hide");
+                            to_page(totalPageNum + 1);
+                        }
+                    });
                 }
-            });
-            $("#emp_add_modal").modal("hide");
-            to_page(totalPageNum+1);
+            }
         })
     });
 

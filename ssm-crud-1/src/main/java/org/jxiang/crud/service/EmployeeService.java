@@ -1,6 +1,7 @@
 package org.jxiang.crud.service;
 
 import org.jxiang.crud.bean.Employee;
+import org.jxiang.crud.bean.EmployeeExample;
 import org.jxiang.crud.dao.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,5 +26,19 @@ public class EmployeeService {
 
     public List<Employee> getAll() {
         return employeeMapper.selectByExampleWithDepartment(null);
+    }
+
+    public long getNameCount(String name) {
+        EmployeeExample example = new EmployeeExample();
+        EmployeeExample.Criteria criteria = example.createCriteria();
+        criteria.andEmpNameEqualTo(name);
+        return employeeMapper.countByExample(example);
+    }
+
+    public long getEmailCount(String email) {
+        EmployeeExample example = new EmployeeExample();
+        EmployeeExample.Criteria criteria = example.createCriteria();
+        criteria.andEmailEqualTo(email);
+        return employeeMapper.countByExample(example);
     }
 }
