@@ -8,11 +8,15 @@ import org.jxiang.crud.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -41,9 +45,17 @@ public class EmployeeController {
 
     @RequestMapping(path = "/emp", method = RequestMethod.POST)
     @ResponseBody
-    public Msg saveEmp(Employee employee) {
-        employeeService.saveEmp(employee);
-        return Msg.success();
+    public Msg saveEmp(@Valid Employee employee, BindingResult result) {
+        if(result.hasErrors()) {
+            HashMap<String, Object> map = new HashMap<>();
+            for (FieldError fieldError : result.getFieldErrors()) {
+                map.put(fieldError.getField(),fieldError.getDefaultMessage());
+            }
+            return Msg.fail().add("errorFields",map);
+        } else {
+            employeeService.saveEmp(employee);
+            return Msg.success();
+        }
     }
 
     @RequestMapping("/emps")

@@ -210,7 +210,7 @@
         // bind add emp button
         $("#emp_add_btn").click(function () {
             // reset form
-            $("#emp_add_modal form")[0].reset();
+            reset_form("#emp_add_modal form");
             // $("#emp_add_modal form").attr("valid_status","");
             // get dep list
             getDepts();
@@ -221,24 +221,43 @@
         });
 
         // bind employee save button
-        $("#emp_save_btn").click(function () {
-            if (validate_add_form() == true) {
-                if (valid_add_form_bg()) {
-                    var emp = $("#emp_add_modal form").serialize();
-                    $.ajax({
-                        url: "${APP_PATH}/emp",
-                        type: "POST",
-                        data: emp,
-                        success: function (result) {
-                            alert(result.msg);
+        $("#emp_save_btn").click(save_button_click);
+
+    });
+
+    function save_button_click () {
+        if (validate_add_form() == true) {
+            if (valid_add_form_bg()) {
+                var emp = $("#emp_add_modal form").serialize();
+                $.ajax({
+                    url: "${APP_PATH}/emp",
+                    type: "POST",
+                    data: emp,
+                    success: function (result) {
+                        alert(result.msg);
+                        if(result.errorCode == "100") {
                             $("#emp_add_modal").modal("hide");
                             to_page(totalPageNum + 1);
+                        } else {
+                            if(result.extend.errorFields.empName) {
+                                set_validation_status("#empName_add_input", "error", result.extend.errorFields.empName);
+                            }
+                            if(result.extend.errorFields.email) {
+                                set_validation_status("#email_add_input", "error", result.extend.errorFields.email);
+                            }
                         }
-                    });
-                }
+                    }
+                });
             }
-        })
-    });
+        }
+    }
+
+    function reset_form(ele) {
+        $(ele)[0].reset();
+        $(ele).attr("validated","false");
+        $(ele).find("*").removeClass("has-success has-error");
+        $(ele).find(".help-block").text("");
+    }
 
     function getDepts() {
         $.ajax({

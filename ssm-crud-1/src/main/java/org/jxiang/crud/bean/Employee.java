@@ -1,9 +1,19 @@
 package org.jxiang.crud.bean;
 
+import javax.validation.constraints.Pattern;
+
 public class Employee {
     private Integer empId;
 
+    @Pattern(regexp = "^[a-z0-9_-]{6,16}$", message = "用户名只能是6-16位英文或数字。")
     private String empName;
+
+    private String gender;
+
+    @Pattern(regexp = "^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$", message = "邮箱格式不正确。")
+    private String email;
+
+    private Integer dId;
 
     public Employee(Integer empId, String empName, String gender, String email, Integer dId) {
         this.empId = empId;
@@ -15,12 +25,6 @@ public class Employee {
 
     public Employee() {
     }
-
-    private String gender;
-
-    private String email;
-
-    private Integer dId;
 
     // added
     private Department department;
